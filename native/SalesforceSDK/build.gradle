@@ -1,0 +1,67 @@
+apply plugin: 'maven-publish'
+apply plugin: 'android-library'
+
+version = "1.0.0-SNAPSHOT"
+group = "com.force"
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.10.+'
+    }
+}
+
+
+repositories {
+    mavenCentral()
+    maven {
+        url "http://maven-decentral.github.io/m2/releases"
+    }
+    maven {
+        url "http://maven-decentral.github.io/m2/snapshots"
+    }
+}
+
+dependencies {
+    compile 'com.mcxiaoke.volley:library:1.0.+'
+    compile 'com.google.guava:guava:r09'
+    compile('org.apache.httpcomponents:httpmime:4.0.3') {
+        // exclude these transitives because the conflict with built-in Android stuff
+        exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+    }
+    compile 'org.apache:cordova:2.3.0@aar'
+    compile 'com.zutubi:android-junit-report:0.0.1-SNAPSHOT@aar'
+}
+
+android {
+    compileSdkVersion 17
+    buildToolsVersion "19.0.3"
+
+    lintOptions {
+        abortOnError false
+    }
+/*
+    defaultConfig {
+        minSdkVersion 8
+        targetSdkVersion 11
+        versionCode 1
+        versionName "1.0"
+    }
+*/
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact "${project.libsDir}/${project.name}-${project.version}.aar"
+        }
+    }
+    repositories {
+        maven {
+            url "../../maven-decentral.github.io/m2/${project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases' }"
+        }
+    }
+}
