@@ -1,7 +1,7 @@
 apply plugin: 'maven-publish'
 apply plugin: 'android-library'
 
-version = "1.0.0-SNAPSHOT"
+version = "2.1.1-SNAPSHOT"
 group = "com.force"
 
 buildscript {
@@ -61,7 +61,7 @@ publishing {
     }
     repositories {
         maven {
-            url "../../maven-decentral.github.io/m2/${project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases' }"
+            url "../../../maven-decentral.github.io/m2/${project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases' }"
         }
     }
 }
