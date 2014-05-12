@@ -1,7 +1,7 @@
 apply plugin: 'maven-publish'
 apply plugin: 'android-library'
 
-version = "2.1.1-1"
+version = "2.1.1-2"
 group = "com.force"
 
 buildscript {
@@ -53,25 +53,63 @@ android {
 */
 }
 
+def pomConfig = {
+    repositories {
+        repository {
+            id 'maven-decentral-snapshots'
+            url 'http://maven-decentral.github.io/m2/snapshots'
+            snapshots {
+                enabled true
+            }
+        }
+    }
+
+    dependencies {
+        dependency {
+            groupId 'com.mcxiaoke.volley'
+            artifactId 'library'
+            version '1.0.4'
+        }
+        dependency {
+            groupId 'com.google.guava'
+            artifactId 'guava'
+            version 'r09'
+        }
+        dependency {
+            groupId 'org.apache.httpcomponents'
+            artifactId 'httpmime'
+            version '4.0.3'
+            exclusions {
+                exclusion {
+                    groupId 'commons-logging'
+                    artifactId 'commons-logging'
+                }
+                exclusion {
+                    groupId 'org.apache.httpcomponents'
+                    artifactId 'httpclient'
+                }
+            }
+        }
+        dependency {
+            groupId 'org.apache'
+            artifactId 'cordova'
+            version '2.3.0-1'
+        }
+        dependency {
+            groupId 'com.zutubi'
+            artifactId 'android-junit-report'
+            version '0.0.1-SNAPSHOT'
+        }
+    }
+}
+pomConfig.resolveStrategy = Closure.DELEGATE_ONLY
+
 publishing {
     publications {
         maven(MavenPublication) {
             // pull the transitive deps in
-            // borrowed from: https://github.com/danieltwagner/android-async-logger/blob/master/build.gradle
             pom.withXml {
-                def dependenciesRoot = asNode().appendNode('dependencies')
-                // read the compile dependencies...
-                def compileConfiguration = project.configurations.getByName("compile")
-                def resolvedConfiguration = compileConfiguration.resolvedConfiguration
-                def resolvedDependencies = resolvedConfiguration.firstLevelModuleDependencies
-                resolvedDependencies.each { dp ->
-                    // ... and generate the XML for each dependency manually
-                    def thisDependency = dependenciesRoot.appendNode('dependency')
-                    thisDependency.appendNode('groupId', dp.moduleGroup)
-                    thisDependency.appendNode('artifactId', dp.moduleName)
-                    thisDependency.appendNode('version', dp.moduleVersion)
-                }
-                return dependenciesRoot
+                asNode().children().last() + pomConfig
             }
             artifact "${project.libsDir}/${project.name}-${project.version}.aar"
         }
