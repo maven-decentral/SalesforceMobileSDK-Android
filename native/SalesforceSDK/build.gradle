@@ -43,27 +43,9 @@ android {
     lintOptions {
         abortOnError false
     }
-/*
-    defaultConfig {
-        minSdkVersion 8
-        targetSdkVersion 11
-        versionCode 1
-        versionName "1.0"
-    }
-*/
 }
 
 def pomConfig = {
-    repositories {
-        repository {
-            id 'maven-decentral-snapshots'
-            url 'http://maven-decentral.github.io/m2/snapshots'
-            snapshots {
-                enabled true
-            }
-        }
-    }
-
     dependencies {
         dependency {
             groupId 'com.mcxiaoke.volley'
@@ -107,7 +89,6 @@ pomConfig.resolveStrategy = Closure.DELEGATE_ONLY
 publishing {
     publications {
         maven(MavenPublication) {
-            // pull the transitive deps in
             pom.withXml {
                 asNode().children().last() + pomConfig
             }
