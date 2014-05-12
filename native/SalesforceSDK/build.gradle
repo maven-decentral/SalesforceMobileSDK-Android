@@ -1,7 +1,7 @@
 apply plugin: 'maven-publish'
 apply plugin: 'android-library'
 
-version = "2.1.1"
+version = "2.1.1-1"
 group = "com.force"
 
 buildscript {
@@ -32,8 +32,8 @@ dependencies {
         exclude group: 'commons-logging', module: 'commons-logging'
         exclude group: 'org.apache.httpcomponents', module: 'httpclient'
     }
-    compile 'org.apache:cordova:2.3.0@aar'
-    compile 'com.zutubi:android-junit-report:0.0.1-SNAPSHOT@aar'
+    compile 'org.apache:cordova:2.3.0-1'
+    compile 'com.zutubi:android-junit-report:0.0.1-SNAPSHOT'
 }
 
 android {
@@ -56,6 +56,23 @@ android {
 publishing {
     publications {
         maven(MavenPublication) {
+            // pull the transitive deps in
+            // borrowed from: https://github.com/danieltwagner/android-async-logger/blob/master/build.gradle
+            pom.withXml {
+                def dependenciesRoot = asNode().appendNode('dependencies')
+                // read the compile dependencies...
+                def compileConfiguration = project.configurations.getByName("compile")
+                def resolvedConfiguration = compileConfiguration.resolvedConfiguration
+                def resolvedDependencies = resolvedConfiguration.firstLevelModuleDependencies
+                resolvedDependencies.each { dp ->
+                    // ... and generate the XML for each dependency manually
+                    def thisDependency = dependenciesRoot.appendNode('dependency')
+                    thisDependency.appendNode('groupId', dp.moduleGroup)
+                    thisDependency.appendNode('artifactId', dp.moduleName)
+                    thisDependency.appendNode('version', dp.moduleVersion)
+                }
+                return dependenciesRoot
+            }
             artifact "${project.libsDir}/${project.name}-${project.version}.aar"
         }
     }
