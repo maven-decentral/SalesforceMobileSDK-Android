@@ -1,7 +1,7 @@
 apply plugin: 'maven-publish'
 apply plugin: 'android-library'
 
-version = "2.1.1-3"
+version = "2.1.1-4"
 group = "com.force"
 
 buildscript {
@@ -9,7 +9,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.10.+'
+        classpath 'com.android.tools.build:gradle:0.12.2'
     }
 }
 
@@ -35,7 +35,7 @@ dependencies {
 
 android {
     compileSdkVersion 17
-    buildToolsVersion "19.0.3"
+    buildToolsVersion "19.1.0"
 
     lintOptions {
         abortOnError false
@@ -89,7 +89,7 @@ publishing {
             pom.withXml {
                 asNode().children().last() + pomConfig
             }
-            artifact "${project.libsDir}/${project.name}-${project.version}.aar"
+            artifact "build/outputs/aar/${project.name}-${project.version}.aar"
         }
     }
     repositories {
