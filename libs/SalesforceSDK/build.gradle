@@ -1,19 +1,42 @@
-
+apply plugin: 'maven-publish'
 apply plugin: 'android-library'
 
+version = "2.3.0"
+group = "com.force"
+
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.12.2'
+    }
+}
+
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url "http://maven-decentral.github.io/m2/releases"
+    }
+}
+
 dependencies {
-  compile files('libs/cordova-2.3.0.jar')
-  compile files('libs/volley_android-4.4.2_r2.jar')
-  compile files('libs/android-junit-report-1.2.6.jar')
-  compile files('libs/guava-r09.jar') 
-  compile files('libs/httpmime-4.0.3.jar')
-  compile files('libs/apache-mime4j-0.6.jar')
-  // TODO if we ever move off ant, we can remove the jars from the repo and have the jars be pulled from maven central
-  //      by using: compile 'group:name:version'
+    compile 'com.mcxiaoke.volley:library:1.0.+'
+    compile 'com.google.guava:guava:r09'
+    compile('org.apache.httpcomponents:httpmime:4.0.3') {
+        // exclude these transitives because the conflict with built-in Android stuff
+        exclude group: 'commons-logging', module: 'commons-logging'
+        exclude group: 'org.apache.httpcomponents', module: 'httpclient'
+    }
+    compile 'org.apache:cordova:3.5.1'
+    compile 'com.zutubi:android-junit-report:2a283d2983'
 }
 
 android {
-  compileSdkVersion 11
+  compileSdkVersion 19
   buildToolsVersion "20.0.0"
 
   sourceSets {
@@ -26,17 +49,6 @@ android {
       res.srcDirs = ['res']
       assets.srcDirs = ['assets']
     }
-    
-    androidTest.setRoot('../test/SalesforceSDKTest')
-    androidTest {
-      java.srcDirs = ['../test/SalesforceSDKTest/src']
-      resources.srcDirs = ['../test/SalesforceSDKTest/src']
-      res.srcDirs = ['../test/SalesforceSDKTest/res']
-    }
-  }
-  defaultConfig {
-    testPackageName "com.salesforce.androidsdk.tests"
-    testInstrumentationRunner "com.salesforce.androidsdk.util.JUnitReportTestRunner"
   }
   packagingOptions {
     exclude 'META-INF/LICENSE'
@@ -45,4 +57,61 @@ android {
     exclude 'META-INF/NOTICE'
   }
 
+}
+
+def pomConfig = {
+    dependencies {
+        dependency {
+            groupId 'com.mcxiaoke.volley'
+            artifactId 'library'
+            version '1.0.4'
+        }
+        dependency {
+            groupId 'com.google.guava'
+            artifactId 'guava'
+            version 'r09'
+        }
+        dependency {
+            groupId 'org.apache.httpcomponents'
+            artifactId 'httpmime'
+            version '4.0.3'
+            exclusions {
+                exclusion {
+                    groupId 'commons-logging'
+                    artifactId 'commons-logging'
+                }
+                exclusion {
+                    groupId 'org.apache.httpcomponents'
+                    artifactId 'httpclient'
+                }
+            }
+        }
+        dependency {
+            groupId 'org.apache'
+            artifactId 'cordova'
+            version '3.5.1'
+        }
+        dependency {
+            groupId 'com.zutubi'
+            artifactId 'android-junit-report'
+            version '2a283d2983'
+        }
+    }
+}
+pomConfig.resolveStrategy = Closure.DELEGATE_ONLY
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            pom.withXml {
+                asNode().children().last() + pomConfig
+            }
+            artifact "build/outputs/aar/${project.name}-${project.version}.aar"
+        }
+    }
+    repositories {
+        maven {
+            url "../../../maven-decentral.github.io/m2/${project.version.endsWith('-SNAPSHOT') ? 'snapshots' : 'releases' }"
+        }
+    }
 }
